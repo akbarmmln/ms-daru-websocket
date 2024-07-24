@@ -13,6 +13,8 @@ const bcrypt = require('bcryptjs');
 const saltRounds = 12;
 const connectionDB = require('../../../config/db').Sequelize;
 const axios = require('axios');
+const {fire} = require("../../../config/firebase");
+const firestore = fire.firestore();
 
 exports.getLogin = async function (req, res) {
   try {
@@ -108,10 +110,56 @@ exports.getPreRegister = async function (req, res) {
     if (dataVerif && dataVerif.is_registered == 1) {
       return res.status(200).json(rsmg('90004', null));
     }
-
+    
     return res.status(200).json(rsmg('000000', dataVerif));
   } catch (e) {
     logger.error('error POST /api/v1/account/pre-register...', e);
     return utils.returnErrorFunction(res, 'error POST /api/v1/account/pre-register...', e);
+  }
+}
+
+exports.getPostReister = async function (req, res) {
+  let transaction = await connectionDB.transaction();
+  try {
+    const tabelRegistered = (await firestore.collection('daru').doc('register_partition').get()).data();
+    const obj = tabelRegistered.partition.find(o => o.status);
+    if (!obj) {
+      throw '90005';
+    }
+    const partition = obj.table;
+
+    const id = `${uuidv4()}-${partition}`;
+    const nama = req.body.nama;
+    const kk = req.body.kk
+    const mobile_number = req.body.mobile_number;
+    const email = req.body.email;
+    const alamat = req.body.alamat;
+    const blok = req.body.blok;
+    const nomor_rumah = req.body.nomor_rumah;
+    const rt = req.body.rt;
+    const rw = req.body.rw;
+    let pin = req.body.pin;
+    pin = await bcrypt.hash(pin, saltRounds);
+
+    const cekData = await connectionDB.query("SELECT * FROM adr_verifikasi WHERE kk = :kk_ FOR UPDATE",
+    { replacements: { kk_: kk }, type: connectionDB.QueryTypes.SELECT, transaction: transaction },
+    {
+      raw: true
+    });
+
+    if (cekData.length > 0 && cekData[0].is_registered == 0) {
+      await transaction.commit();
+      return res.status(200).json(rsmg('000000', {}));
+    } else if (cekData.length > 0 && cekData[0].is_registered == 1) {
+      await transaction.rollback();
+      return res.status(200).json(rsmg('90004', null));
+    } else {
+      await transaction.rollback();
+      return res.status(200).json(rsmg('90001', null));
+    }
+  } catch (e) {
+    await transaction.rollback();
+    logger.error('error POST /api/v1/account/post-register...', e);
+    return utils.returnErrorFunction(res, 'error POST /api/v1/account/post-register...', e);
   }
 }
