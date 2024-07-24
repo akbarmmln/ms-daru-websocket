@@ -40,15 +40,12 @@
       "node-fetch": "^3.3.2",
       "nodemailer": "^6.9.7",
       "pug": "^3.0.2",
-      "puppeteer": "^21.6.1",
-      "puppeteer-core": "^21.6.1",
       "request": "^2.88.2",
       "request-promise": "^4.2.6",
       "sequelize": "^6.37.3",
       "string-template": "^1.0.0",
       "utf8": "^3.0.0",
       "uuid": "^9.0.1",
-      "wkhtmltopdf": "^0.4.0",
       "yarn": "^1.22.21"
     }
   }
