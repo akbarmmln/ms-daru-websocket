@@ -35,7 +35,7 @@ exports.getAccount = async function (req, res) {
     }
     return res.status(200).json(rsmg(hasil));
   } catch (e) {
-    logger.error('error POST /api/v2/account...', e);
-    return utils.returnErrorFunction(res, 'error POST /api/v2/account...', e);
+    logger.error('error POST /api/v1/account...', e);
+    return utils.returnErrorFunction(res, 'error POST /api/v1/account...', e);
   }
 }
