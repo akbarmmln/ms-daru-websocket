@@ -18,10 +18,27 @@ exports.createClient = async function(clientId) {
     })
 }
 
+exports.deleteClient = async function(clientId) {
+    await adrConnectionTable.destroy({
+        where: { client_id: clientId }
+    });  
+}
+
 exports.create = async function (req, res) {
     try {
         const clientId = req.body.clientId;
         await exports.createClient(clientId);
+        return res.status(200).json(rsMsg('000000'))
+    } catch (e) {
+        logger.errorWithContext({ error: e, message: 'error POST /api/v1/socket/create...' });
+        return utils.returnErrorFunction(res, 'error POST /api/v1/socket/create...', e);
+    }
+}
+
+exports.delete = async function (req, res) {
+    try {
+        const clientId = req.body.clientId;
+        await exports.deleteClient(clientId);
         return res.status(200).json(rsMsg('000000'))
     } catch (e) {
         logger.errorWithContext({ error: e, message: 'error POST /api/v1/socket/create...' });
