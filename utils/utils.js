@@ -2,11 +2,9 @@ const logger = require('../config/logger');
 const errMsg = require('../error/resError');
 
 exports.returnErrorFunction = function (resObject, errorMessageLogger, errorObject) {
-  if (typeof errorObject === 'string') {
-    return resObject.status(400).json(errMsg(errorObject));
-  } else if (errorObject.error) {
-    return resObject.status(500).json(errorObject.error);
+  if (errorObject instanceof BaseError) {
+    return resObject.status(errorObject.statusCode).json(errMsg(errorObject.errorCode, errorObject.description, errorObject?.errorDetails));
   } else {
-    return resObject.status(500).json(errMsg('10000'));
+    return resObject.status(500).json(errMsg('70000'));
   }
 };

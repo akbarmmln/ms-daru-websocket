@@ -2,6 +2,7 @@
 require('dotenv').config();
 const app = require('./app');
 const logger = require('./config/logger');
+const socket = require('./api/v1/socket/controller');
 const WebSocket = require('ws');
 
 const PORT_WS = process.env.PORT_WS
@@ -13,13 +14,14 @@ const wss = new WebSocket.Server({ host: '0.0.0.0', port: PORT_WS }, () => {
 wss.on('connection', (ws, req) => {
     let clientId;
 
-    // Handle registration
-    ws.on('message', (message) => {
+    // Handle registration and plush message
+    ws.on('message', async (message) => {
         const data = JSON.parse(message);
 
         if (data.type === 'register') {
             clientId = data.clientId;
             clients.set(clientId, ws);
+            await socket.createClient(clientId);
             console.log(`Registered client: ${clientId}`);
         } else if (data.type === 'message') {
             const targetWs = clients.get(data.targetClientId);
