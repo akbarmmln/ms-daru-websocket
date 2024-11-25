@@ -1,6 +1,5 @@
 'use strict';
 
-const sequelize = require('../../../config/db').Sequelize;
 const logger = require('../../../config/logger');
 const errMsg = require('../../../error/resError');
 const rsMsg = require('../../../response/rs');
@@ -16,15 +15,8 @@ exports.healtyCheck = async function (req, res) {
     }
 }
 
-async function checkMySql() {
-    await sequelize.authenticate()
-        .then(() => { health.dbOk = true })
-        .catch(err => { health.dbOk = false });
-}
-
 async function updateHealthResponse() {
-    await checkMySql();
-    const isReady = health.serverOk && health.dbOk;
+    const isReady = true
 
     if (isReady) {
         logger.infoWithContext('[MS-DARU-AUTH] - Ready to serve traffic');
