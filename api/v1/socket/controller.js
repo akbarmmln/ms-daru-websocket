@@ -8,20 +8,28 @@ const uuidv4 = require('uuid').v4;
 const moment = require('moment');
 
 exports.createClient = async function(clientId) {
-    await adrConnectionTable.create({
-        id: uuidv4(),
-        created_dt: moment().format('YYYY-MM-DD HH:mm:ss.SSS'),
-        created_by: 'SYSTEM',
-        modified_dt: null,
-        modified_by: null,
-        client_id: clientId
-    })
+    try {
+        await adrConnectionTable.create({
+            id: uuidv4(),
+            created_dt: moment().format('YYYY-MM-DD HH:mm:ss.SSS'),
+            created_by: 'SYSTEM',
+            modified_dt: null,
+            modified_by: null,
+            client_id: clientId
+        })
+    } catch (e) {
+        logger.errorWithContext({ error: e, message: 'error create client socket' });
+    }
 }
 
 exports.deleteClient = async function(clientId) {
-    await adrConnectionTable.destroy({
-        where: { client_id: clientId }
-    });  
+    try {
+        await adrConnectionTable.destroy({
+            where: { client_id: clientId }
+        });
+    } catch (e) {
+        logger.errorWithContext({ error: e, message: 'error delete client socket' });
+    }
 }
 
 exports.create = async function (req, res) {
