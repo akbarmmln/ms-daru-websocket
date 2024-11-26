@@ -27,7 +27,11 @@ wss.on('connection', (ws, req) => {
             const targetWs = clients.get(data.targetClientId);
             if (targetWs && targetWs.readyState === WebSocket.OPEN) {
                 logger.infoWithContext(`public message with targeted client id ${clientId}`);
-                targetWs.send(JSON.stringify({ from: clientId, payload: data.payload }));
+                const messageSend = {
+                    from: clientId,
+                    payload: data.payload
+                }
+                targetWs.send(JSON.stringify(messageSend));
             } else {
                 logger.infoWithContext(`public message: ${data.payload}`);
             }
