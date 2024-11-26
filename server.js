@@ -9,7 +9,7 @@ const PORT_WS = process.env.PORT_WS
 
 const clients = new Map();
 const wss = new WebSocket.Server({ host: '0.0.0.0', port: PORT_WS }, () => {
-    console.log(`WebSocket server running on ws://localhost:${PORT_WS}`);
+    logger.infoWithContext(`WebSocket server running on ws://localhost:${PORT_WS}`);
 });
 wss.on('connection', (ws, req) => {
     let clientId;
@@ -22,13 +22,15 @@ wss.on('connection', (ws, req) => {
             clientId = data.clientId;
             clients.set(clientId, ws);
             await socket.createClient(clientId);
-            console.log(`Registered client: ${clientId}`);
+            logger.infoWithContext(`Registered client: ${clientId}`);
         } else if (data.type === 'message') {
+            console.log('clientsclients', JSON.stringify(clients))
+            
             const targetWs = clients.get(data.targetClientId);
             if (targetWs && targetWs.readyState === WebSocket.OPEN) {
                 targetWs.send(JSON.stringify({ from: clientId, payload: data.payload }));
             } else {
-                console.error(`Target client ${data.targetClientId} not found`);
+                logger.infoWithContext(`Target client ${data.targetClientId} not found`);
             }
         }
     });
@@ -38,7 +40,7 @@ wss.on('connection', (ws, req) => {
         if (clientId) {
             clients.delete(clientId);
             await socket.deleteClient(clientId)
-            console.log(`Disconnected client: ${clientId}`);
+            logger.infoWithContext(`Disconnected client: ${clientId}`);
         }
     });
 });
