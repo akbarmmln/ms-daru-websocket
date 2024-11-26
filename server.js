@@ -19,18 +19,16 @@ wss.on('connection', (ws, req) => {
         const data = JSON.parse(message);
 
         if (data.type === 'register') {
-            console.log('terima register')
             clientId = data.clientId;
             clients.set(clientId, ws);
             await socket.createClient(clientId);
             logger.infoWithContext(`Registered client: ${clientId}`);
         } else if (data.type === 'message') {
-            console.log('terima pesan')
             const targetWs = clients.get(data.targetClientId);
             if (targetWs && targetWs.readyState === WebSocket.OPEN) {
                 targetWs.send(JSON.stringify({ from: clientId, payload: data.payload }));
             } else {
-                logger.infoWithContext(`Target client ${data.targetClientId} not found`);
+                logger.infoWithContext(`public message: ${data.payload}`);
             }
         }
     });
