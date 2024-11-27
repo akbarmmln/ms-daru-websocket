@@ -58,18 +58,16 @@ wss.on('connection', (ws, req) => {
 
     // Handle ping received
     ws.on('ping', () => {
-        console.log(`Received ping from client: ${clientId}`)
         logger.infoWithContext(`Received ping from client: ${clientId}`);
         ws.pong();
     });
 });
 
 setInterval(() => {
-    console.log('running checking client socket by send ping')
+    logger.infoWithContext('running checking client socket by send ping')
     clients.forEach((ws, clientId) => {
         if (ws.readyState === WebSocket.OPEN) {
             ws.ping();
-            console.log(`ping send to client ${clientId}`)
             logger.infoWithContext(`ping send to client ${clientId}`);
         } else {
             logger.infoWithContext(`Client ${clientId} not reachable`);
