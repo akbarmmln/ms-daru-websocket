@@ -14,9 +14,7 @@ const PORT = process.env.PORT
 //     logger.infoWithContext(`WebSocket server running on ws://localhost:${PORT_WS}`);
 // });
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server }, () => {
-    logger.infoWithContext(`WebSocket server running on ws://localhost:${PORT}`);
-});
+const wss = new WebSocket.Server({ server });
 
 wss.on('connection', (ws, req) => {
     let clientId;
