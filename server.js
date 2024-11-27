@@ -60,6 +60,7 @@ wss.on('connection', (ws, req) => {
     ws.on('ping', () => {
         console.log(`Received ping from client: ${clientId}`)
         logger.infoWithContext(`Received ping from client: ${clientId}`);
+        ws.pong();
     });
 });
 
@@ -68,6 +69,7 @@ setInterval(() => {
     clients.forEach((ws, clientId) => {
         if (ws.readyState === WebSocket.OPEN) {
             ws.ping();
+            logger.infoWithContext(`ping send to client ${clientId}`);
         } else {
             logger.infoWithContext(`Client ${clientId} not reachable`);
         }
