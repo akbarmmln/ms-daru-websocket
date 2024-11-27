@@ -35,10 +35,10 @@ wss.on('connection', (ws, req) => {
                 payload: data.payload
             }
             if (targetWs && targetWs.readyState === WebSocket.OPEN) {
-                logger.infoWithContext(`public message with targeted client id ${clientId}`);
+                logger.infoWithContext(`public message with targeted client id ${data.targetClientId}`);
                 targetWs.send(JSON.stringify(messageSend));
             } else if (targetWs && targetWs.readyState === WebSocket.CLOSED) {
-                logger.infoWithContext(`public message with targeted client id ${clientId} not send, with payload ${messageSend}. Connection not open`);
+                logger.infoWithContext(`public message with targeted client id ${data.targetClientId} not send, with payload ${JSON.stringify(messageSend)}. Connection not open`);
             } else {
                 logger.infoWithContext(`public message: ${JSON.stringify(messageSend)}`);
             }
