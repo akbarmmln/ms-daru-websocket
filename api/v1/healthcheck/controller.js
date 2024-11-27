@@ -19,7 +19,7 @@ exports.healtyCheck = async function (req, res) {
 
 exports.socket = async function(req, res) {
     try {
-        return res.status(200).json(rsMsg('000000', clients))
+        return res.status(200).json(rsMsg('000000', Array.from(clients.entries())));
     } catch (e) {
         logger.errorWithContext({ error: e, message: 'error GET /api/v1/healthcheck/socket...' });
         return utils.returnErrorFunction(res, 'error GET /api/v1/healthcheck/socket...', e);
