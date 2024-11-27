@@ -1,16 +1,21 @@
 'use strict';
 require('dotenv').config();
+const http = require('http');
 const app = require('./app');
 const logger = require('./config/logger');
 const socket = require('./api/v1/socket/controller');
 const WebSocket = require('ws');
-
-const PORT_WS = process.env.PORT_WS
-
 const clients = new Map();
-const wss = new WebSocket.Server({ host: '0.0.0.0', port: PORT_WS }, () => {
-    logger.infoWithContext(`WebSocket server running on ws://localhost:${PORT_WS}`);
-});
+
+// const PORT_WS = process.env.PORT_WS
+const PORT = process.env.PORT
+
+// const wss = new WebSocket.Server({ host: '0.0.0.0', port: PORT_WS }, () => {
+//     logger.infoWithContext(`WebSocket server running on ws://localhost:${PORT_WS}`);
+// });
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
 wss.on('connection', (ws, req) => {
     let clientId;
 
@@ -48,7 +53,7 @@ wss.on('connection', (ws, req) => {
     });
 });
 
-const PORT = process.env.PORT
-const server = app.listen(PORT, () => logger.infoWithContext(`API Server started. Listening on port:${PORT}`));
+// const server = app.listen(PORT, () => logger.infoWithContext(`API Server started. Listening on port:${PORT}`));
+server.listen(PORT, () => logger.infoWithContext(`Server (HTTP + WebSocket) started. Listening on port:${PORT}`));
 
 module.exports = server;

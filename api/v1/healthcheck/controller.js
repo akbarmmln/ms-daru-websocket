@@ -19,10 +19,10 @@ async function updateHealthResponse() {
     const isReady = true
 
     if (isReady) {
-        logger.infoWithContext('[MS-DARU-AUTH] - Ready to serve traffic');
+        logger.infoWithContext('[MS-DARU-WEBSOCKET] - Ready to serve traffic');
         return 200;
     } else {
-        logger.infoWithContext('[MS-DARU-AUTH] - Unable to serve traffic');
+        logger.infoWithContext('[MS-DARU-WEBSOCKET] - Unable to serve traffic');
         return 500
     }
 }
