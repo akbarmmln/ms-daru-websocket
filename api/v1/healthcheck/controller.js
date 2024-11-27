@@ -9,7 +9,7 @@ exports.healtyCheck = async function (req, res) {
     health.serverOk = true;
     let asynccc = await updateHealthResponse();
     if (asynccc == 200) {
-        return res.status(200).json(rsMsg());
+        return res.status(200).json(rsMsg('000000'));
     } else {
         return res.status(500).json(errMsg('01000'));
     }

@@ -38,7 +38,11 @@ wss.on('connection', (ws, req) => {
                 }
                 targetWs.send(JSON.stringify(messageSend));
             } else {
-                logger.infoWithContext(`public message: ${data.payload}`);
+                const messageSend = {
+                    from: clientId,
+                    payload: data.payload
+                }
+                logger.infoWithContext(`public message: ${JSON.stringify(messageSend)}`);
             }
         }
     });
