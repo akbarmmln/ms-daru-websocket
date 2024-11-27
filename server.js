@@ -71,7 +71,7 @@ setInterval(() => {
             logger.infoWithContext(`ping send to client ${clientId} not reachable`);
         }
     });
-}, 10000);
+}, 30000);
 
 // const server = app.listen(PORT, () => logger.infoWithContext(`API Server started. Listening on port:${PORT}`));
 server.listen(PORT, () => logger.infoWithContext(`Server (HTTP + WebSocket) started. Listening on port:${PORT}`));
