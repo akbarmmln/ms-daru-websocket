@@ -69,6 +69,7 @@ setInterval(() => {
     clients.forEach((ws, clientId) => {
         if (ws.readyState === WebSocket.OPEN) {
             ws.ping();
+            console.log(`ping send to client ${clientId}`)
             logger.infoWithContext(`ping send to client ${clientId}`);
         } else {
             logger.infoWithContext(`Client ${clientId} not reachable`);
