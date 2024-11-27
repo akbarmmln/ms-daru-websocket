@@ -4,6 +4,7 @@ const logger = require('../../../config/logger');
 const errMsg = require('../../../error/resError');
 const rsMsg = require('../../../response/rs');
 let health = { serverOk: false, dbOk: false };
+const utils = require('../../../utils/utils');
 
 exports.healtyCheck = async function (req, res) {
     health.serverOk = true;
@@ -12,6 +13,15 @@ exports.healtyCheck = async function (req, res) {
         return res.status(200).json(rsMsg('000000'));
     } else {
         return res.status(500).json(errMsg('01000'));
+    }
+}
+
+exports.socket = async function(req, res) {
+    try {
+        return res.status(200).json(rsMsg('000000', global.clients))
+    } catch (e) {
+        logger.errorWithContext({ error: e, message: 'error GET /api/v1/healthcheck/socket...' });
+        return utils.returnErrorFunction(res, 'error GET /api/v1/healthcheck/socket...', e);
     }
 }
 

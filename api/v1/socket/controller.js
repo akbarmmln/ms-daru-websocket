@@ -6,6 +6,7 @@ const rsMsg = require('../../../response/rs');
 const adrConnectionTable = require('../../../model/adr_connection_table')
 const uuidv4 = require('uuid').v4;
 const moment = require('moment');
+const utils = require('../../../utils/utils');
 
 exports.createClient = async function(clientId) {
     try {

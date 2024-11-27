@@ -5,7 +5,7 @@ const app = require('./app');
 const logger = require('./config/logger');
 const socket = require('./api/v1/socket/controller');
 const WebSocket = require('ws');
-const clients = new Map();
+global.clients = new Map();
 
 // const PORT_WS = process.env.PORT_WS
 const PORT = process.env.PORT
