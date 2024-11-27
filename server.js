@@ -60,11 +60,11 @@ wss.on('connection', (ws, req) => {
     ws.on('ping', () => {
         console.log(`Received ping from client: ${clientId}`)
         logger.infoWithContext(`Received ping from client: ${clientId}`);
-        ws.pong();
     });
 });
 
 setInterval(() => {
+    console.log('running checking client socket by send ping')
     clients.forEach((ws, clientId) => {
         if (ws.readyState === WebSocket.OPEN) {
             ws.ping();
@@ -72,7 +72,7 @@ setInterval(() => {
             logger.infoWithContext(`Client ${clientId} not reachable`);
         }
     });
-}, 10000); // Every 10 seconds
+}, 10000);
 
 // const server = app.listen(PORT, () => logger.infoWithContext(`API Server started. Listening on port:${PORT}`));
 server.listen(PORT, () => logger.infoWithContext(`Server (HTTP + WebSocket) started. Listening on port:${PORT}`));
