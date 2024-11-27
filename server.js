@@ -63,6 +63,7 @@ wss.on('connection', (ws, req) => {
 
 setInterval(() => {
     logger.infoWithContext('running checking client socket by send ping')
+    console.log(`Number of connected clients: ${clients.size}`)
     clients.forEach((ws, clientId) => {
         if (ws.readyState === WebSocket.OPEN) {
             ws.ping();
