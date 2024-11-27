@@ -48,9 +48,9 @@ wss.on('connection', (ws, req) => {
     // Cleanup on disconnect
     ws.on('close', async () => {
         if (clientId) {
-            clients.delete(clientId);
+            // clients.delete(clientId);
             await socket.deleteClient(clientId)
-            logger.infoWithContext(`Disconnected client: ${clientId}`);
+            logger.infoWithContext(`Disconnected client: ${clientId}, ${ws.readyState}`);
         }
     });
 
