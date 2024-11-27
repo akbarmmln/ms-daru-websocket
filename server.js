@@ -56,7 +56,7 @@ wss.on('connection', (ws, req) => {
         }
     });
 
-    // Handle ping reveived
+    // Handle ping received
     ws.on('ping', () => {
         console.log(`Received ping from client: ${clientId}`)
         logger.infoWithContext(`Received ping from client: ${clientId}`);
