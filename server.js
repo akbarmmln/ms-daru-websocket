@@ -63,13 +63,13 @@ wss.on('connection', (ws, req) => {
 
 setInterval(() => {
     logger.infoWithContext('running checking client socket by send ping')
-    console.log(`Number of connected clients: ${clients.size}`)
+    logger.infoWithContext(`Number of connected clients: ${clients.size}`)
     clients.forEach((ws, clientId) => {
         if (ws.readyState === WebSocket.OPEN) {
             ws.ping();
-            logger.infoWithContext(`ping send to client ${clientId} reachable`);
+            logger.infoWithContext(`ping to client ${clientId} reachable`);
         } else {
-            logger.infoWithContext(`ping send to client ${clientId} not reachable`);
+            logger.infoWithContext(`ping to client ${clientId} not reachable`);
         }
     });
 }, 30000);
