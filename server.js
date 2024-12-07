@@ -43,12 +43,13 @@ wss.on('connection', (ws, req) => {
             if (targetClient) {
                 const targetWs = JSON.parse(targetClient);
                 console.log('targetWstargetWs', JSON.stringify(targetWs));
-                console.log('targetWstargetWs readyState', JSON.stringify(targetWs.readyState));
-
-                if (targetWs && targetWs.readyState === WebSocket.OPEN) {
+                console.log('targetWstargetWs readyState', JSON.stringify(targetWs.connectDetails['_readyState']));
+                console.log('targetWstargetWs readyState1', JSON.stringify(targetWs.readyState));
+                
+                if (targetWs && targetWs.connectDetails['_readyState'] === WebSocket.OPEN) {
                     logger.infoWithContext(`public message with targeted client id ${data.targetClientId}`);
                     targetWs.send(JSON.stringify(messageSend));
-                } else if (targetWs && targetWs.readyState === WebSocket.CLOSED) {
+                } else if (targetWs && targetWs.connectDetails['_readyState'] === WebSocket.CLOSED) {
                     logger.infoWithContext(`public message with targeted client id ${data.targetClientId} not send, with payload ${JSON.stringify(messageSend)}. Connection not open`);
                 } else {
                     logger.infoWithContext(`public message: ${JSON.stringify(messageSend)}`);
