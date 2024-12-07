@@ -39,6 +39,7 @@ wss.on('connection', (ws, req) => {
                 from: clientId,
                 payload: data.payload
             }
+            console.log('targetClient', JSON.stringify(targetClient));
             if (targetClient) {
                 const targetWs = JSON.parse(targetClient);
                 console.log('targetWstargetWs', JSON.stringify(targetWs));
