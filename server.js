@@ -85,34 +85,34 @@ wss.on('connection', (ws, req) => {
     });
 });
 
-setInterval(async () => {
-    logger.infoWithContext('running checking client socket by send ping')
-    const clients = await redisClient.hgetall(CLIENTS_KEY);
-    const numberOfClientConnected = Object.entries(clients)
-    logger.infoWithContext(`Number of connected clients: ${numberOfClientConnected.length}`)
+// setInterval(async () => {
+//     logger.infoWithContext('running checking client socket by send ping')
+//     const clients = await redisClient.hgetall(CLIENTS_KEY);
+//     const numberOfClientConnected = Object.entries(clients)
+//     logger.infoWithContext(`Number of connected clients: ${numberOfClientConnected.length}`)
 
-    for (const [clientId, clientData] of Object.entries(clients)) {
-        const clientInfo = JSON.parse(clientData);
-        if (clientInfo) {
-            if (clientInfo.connectDetails['_readyState'] === WebSocket.OPEN) {
-                clientData.ping();
-                logger.infoWithContext(`ping to client ${clientId} reachable`);
-            } else {
-                logger.infoWithContext(`ping to client ${clientId} not reachable`);
-            }
-        }
-    }
+//     for (const [clientId, clientData] of Object.entries(clients)) {
+//         const clientInfo = JSON.parse(clientData);
+//         if (clientInfo) {
+//             if (clientInfo.connectDetails['_readyState'] === WebSocket.OPEN) {
+//                 clientData.ping();
+//                 logger.infoWithContext(`ping to client ${clientId} reachable`);
+//             } else {
+//                 logger.infoWithContext(`ping to client ${clientId} not reachable`);
+//             }
+//         }
+//     }
 
-    // logger.infoWithContext(`Number of connected clients: ${clients.size}`)
-    // clients.forEach((ws, clientId) => {
-    //     if (ws.readyState === WebSocket.OPEN) {
-    //         ws.ping();
-    //         logger.infoWithContext(`ping to client ${clientId} reachable`);
-    //     } else {
-    //         logger.infoWithContext(`ping to client ${clientId} not reachable`);
-    //     }
-    // });
-}, 30000);
+//     // logger.infoWithContext(`Number of connected clients: ${clients.size}`)
+//     // clients.forEach((ws, clientId) => {
+//     //     if (ws.readyState === WebSocket.OPEN) {
+//     //         ws.ping();
+//     //         logger.infoWithContext(`ping to client ${clientId} reachable`);
+//     //     } else {
+//     //         logger.infoWithContext(`ping to client ${clientId} not reachable`);
+//     //     }
+//     // });
+// }, 30000);
 
 // const server = app.listen(PORT, () => logger.infoWithContext(`API Server started. Listening on port:${PORT}`));
 server.listen(PORT, () => logger.infoWithContext(`Server (HTTP + WebSocket) started. Listening on port:${PORT}`));
