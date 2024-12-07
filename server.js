@@ -6,6 +6,9 @@ const logger = require('./config/logger');
 const socket = require('./api/v1/socket/controller');
 const WebSocket = require('ws');
 const clients = require('./config/clients');
+const redisClient = require('./config/redis');
+
+const CLIENTS_KEY = 'websocket_clients';
 
 // const PORT_WS = process.env.PORT_WS
 const PORT = process.env.PORT
@@ -26,7 +29,8 @@ wss.on('connection', (ws, req) => {
         if (data.type === 'register') {
             clientId = data.clientId;
             clients.set(clientId, ws);
-            await socket.createClient(clientId, ws);
+            await redisClient.hset(CLIENTS_KEY, clientId, JSON.stringify({ clientId, connectedAt: Date.now(), connectDetails: ws }));
+            await socket.createClient(clientId);
             logger.infoWithContext(`Registered client: ${clientId}`);
         } else if (data.type === 'message') {
             const targetWs = clients.get(data.targetClientId);
