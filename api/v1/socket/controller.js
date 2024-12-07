@@ -16,7 +16,8 @@ exports.createClient = async function(clientId, ws) {
             created_by: 'SYSTEM',
             modified_dt: null,
             modified_by: null,
-            client_id: clientId
+            client_id: clientId,
+            connection_details: ws
         })
     } catch (e) {
         logger.errorWithContext({ error: e, message: 'error create client socket' });
