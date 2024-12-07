@@ -49,10 +49,17 @@ wss.on('connection', (ws, req) => {
         }
     });
 
+    ws.on('error', (err) => {
+        // Graceful handling: Close the connection to trigger reconnect logic
+        logger.errorWithContext({ error: err, message: `WebSocket error for client id: ${clientId}`})
+        ws.close();
+    });
+
     // Cleanup on disconnect
     ws.on('close', async () => {
         if (clientId) {
             // clients.delete(clientId);
+            await redisClient.hset(CLIENTS_KEY, clientId, JSON.stringify({ clientId, connectedAt: Date.now(), connectDetails: ws }));
             await socket.deleteClient(clientId)
             logger.infoWithContext(`Disconnected client: ${clientId}, ${ws.readyState}`);
         }
