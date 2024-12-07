@@ -26,7 +26,7 @@ wss.on('connection', (ws, req) => {
         if (data.type === 'register') {
             clientId = data.clientId;
             clients.set(clientId, ws);
-            await socket.createClient(clientId);
+            await socket.createClient(clientId, ws);
             logger.infoWithContext(`Registered client: ${clientId}`);
         } else if (data.type === 'message') {
             const targetWs = clients.get(data.targetClientId);

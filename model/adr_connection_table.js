@@ -11,6 +11,7 @@ const adrConnectionTable = dbConnection.define('adr_connection_table', {
   modified_dt: Sequelize.DATE(6),
   modified_by: Sequelize.STRING,
   client_id: Sequelize.STRING,
+  connection_details: Sequelize.STRING,
 }, {
   freezeTableName: true,
   timestamps: false,

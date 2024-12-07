@@ -8,7 +8,7 @@ const uuidv4 = require('uuid').v4;
 const moment = require('moment');
 const utils = require('../../../utils/utils');
 
-exports.createClient = async function(clientId) {
+exports.createClient = async function(clientId, ws) {
     try {
         await adrConnectionTable.create({
             id: uuidv4(),
@@ -36,7 +36,7 @@ exports.deleteClient = async function(clientId) {
 exports.create = async function (req, res) {
     try {
         const clientId = req.body.clientId;
-        await exports.createClient(clientId);
+        await exports.createClient(clientId, null);
         return res.status(200).json(rsMsg('000000'))
     } catch (e) {
         logger.errorWithContext({ error: e, message: 'error POST /api/v1/socket/create...' });
