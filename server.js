@@ -5,7 +5,7 @@ const app = require('./app');
 const logger = require('./config/logger');
 const socket = require('./api/v1/socket/controller');
 const WebSocket = require('ws');
-const clients = require('./config/clients');
+// const clients = require('./config/clients');
 const redisClient = require('./config/redis');
 
 const CLIENTS_KEY = 'websocket_clients';
@@ -28,24 +28,37 @@ wss.on('connection', (ws, req) => {
 
         if (data.type === 'register') {
             clientId = data.clientId;
-            clients.set(clientId, ws);
+            // clients.set(clientId, ws);
             await redisClient.hset(CLIENTS_KEY, clientId, JSON.stringify({ clientId, connectedAt: Date.now(), connectDetails: ws }));
             await socket.createClient(clientId);
             logger.infoWithContext(`Registered client: ${clientId}`);
         } else if (data.type === 'message') {
-            const targetWs = clients.get(data.targetClientId);
+            // const targetWs = clients.get(data.targetClientId);
+            const targetClient = await redisClient.hget(CLIENTS_KEY, data.targetClientId);
             const messageSend = {
                 from: clientId,
                 payload: data.payload
             }
-            if (targetWs && targetWs.readyState === WebSocket.OPEN) {
-                logger.infoWithContext(`public message with targeted client id ${data.targetClientId}`);
-                targetWs.send(JSON.stringify(messageSend));
-            } else if (targetWs && targetWs.readyState === WebSocket.CLOSED) {
-                logger.infoWithContext(`public message with targeted client id ${data.targetClientId} not send, with payload ${JSON.stringify(messageSend)}. Connection not open`);
-            } else {
-                logger.infoWithContext(`public message: ${JSON.stringify(messageSend)}`);
+            if (targetClient) {
+                const targetWs = JSON.parse(targetClient);
+                console.log('targetWstargetWs', JSON.stringify(targetWs));
+                if (targetWs && targetWs.readyState === WebSocket.OPEN) {
+                    logger.infoWithContext(`public message with targeted client id ${data.targetClientId}`);
+                    targetWs.send(JSON.stringify(messageSend));
+                } else if (targetWs && targetWs.readyState === WebSocket.CLOSED) {
+                    logger.infoWithContext(`public message with targeted client id ${data.targetClientId} not send, with payload ${JSON.stringify(messageSend)}. Connection not open`);
+                } else {
+                    logger.infoWithContext(`public message: ${JSON.stringify(messageSend)}`);
+                }
             }
+            // if (targetWs && targetWs.readyState === WebSocket.OPEN) {
+            //     logger.infoWithContext(`public message with targeted client id ${data.targetClientId}`);
+            //     targetWs.send(JSON.stringify(messageSend));
+            // } else if (targetWs && targetWs.readyState === WebSocket.CLOSED) {
+            //     logger.infoWithContext(`public message with targeted client id ${data.targetClientId} not send, with payload ${JSON.stringify(messageSend)}. Connection not open`);
+            // } else {
+            //     logger.infoWithContext(`public message: ${JSON.stringify(messageSend)}`);
+            // }
         }
     });
 
@@ -59,6 +72,7 @@ wss.on('connection', (ws, req) => {
     ws.on('close', async () => {
         if (clientId) {
             // clients.delete(clientId);
+            // await redisClient.hdel(CLIENTS_KEY, clientId);
             await redisClient.hset(CLIENTS_KEY, clientId, JSON.stringify({ clientId, connectedAt: Date.now(), connectDetails: ws }));
             await socket.deleteClient(clientId)
             logger.infoWithContext(`Disconnected client: ${clientId}, ${ws.readyState}`);
@@ -72,17 +86,31 @@ wss.on('connection', (ws, req) => {
     });
 });
 
-setInterval(() => {
+setInterval(async () => {
     logger.infoWithContext('running checking client socket by send ping')
-    logger.infoWithContext(`Number of connected clients: ${clients.size}`)
-    clients.forEach((ws, clientId) => {
-        if (ws.readyState === WebSocket.OPEN) {
-            ws.ping();
-            logger.infoWithContext(`ping to client ${clientId} reachable`);
-        } else {
-            logger.infoWithContext(`ping to client ${clientId} not reachable`);
+    const clients = await redisClient.hgetall(CLIENTS_KEY);
+    console.log(`Number of connected clients: ${JSON.stringify(clients)}`)
+    for (const [clientId, clientData] of Object.entries(clients)) {
+        const clientInfo = JSON.parse(clientData);
+        if (clientInfo) {
+            if (clientInfo.readyState === WebSocket.OPEN) {
+                clientInfo.ping();
+                logger.infoWithContext(`ping to client ${clientId} reachable`);
+            } else {
+                logger.infoWithContext(`ping to client ${clientId} not reachable`);
+            }
         }
-    });
+    }
+
+    // logger.infoWithContext(`Number of connected clients: ${clients.size}`)
+    // clients.forEach((ws, clientId) => {
+    //     if (ws.readyState === WebSocket.OPEN) {
+    //         ws.ping();
+    //         logger.infoWithContext(`ping to client ${clientId} reachable`);
+    //     } else {
+    //         logger.infoWithContext(`ping to client ${clientId} not reachable`);
+    //     }
+    // });
 }, 30000);
 
 // const server = app.listen(PORT, () => logger.infoWithContext(`API Server started. Listening on port:${PORT}`));
