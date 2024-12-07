@@ -17,7 +17,7 @@ exports.createClient = async function(clientId, ws) {
             modified_dt: null,
             modified_by: null,
             client_id: clientId,
-            connection_details: ws
+            connection_details: JSON.stringify(ws)
         })
     } catch (e) {
         logger.errorWithContext({ error: e, message: 'error create client socket' });
