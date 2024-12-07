@@ -39,16 +39,11 @@ wss.on('connection', (ws, req) => {
                 from: clientId,
                 payload: data.payload
             }
-            console.log('targetClient', JSON.stringify(targetClient));
             if (targetClient) {
-                const targetWs = JSON.parse(targetClient);
-                console.log('targetWstargetWs', JSON.stringify(targetWs));
-                console.log('targetWstargetWs readyState', JSON.stringify(targetWs.connectDetails['_readyState']));
-                console.log('targetWstargetWs readyState1', JSON.stringify(targetWs.readyState));
-                
+                const targetWs = JSON.parse(targetClient);                
                 if (targetWs && targetWs.connectDetails['_readyState'] === WebSocket.OPEN) {
                     logger.infoWithContext(`public message with targeted client id ${data.targetClientId}`);
-                    targetWs.send(JSON.stringify(messageSend));
+                    targetClient.send(JSON.stringify(messageSend));
                 } else if (targetWs && targetWs.connectDetails['_readyState'] === WebSocket.CLOSED) {
                     logger.infoWithContext(`public message with targeted client id ${data.targetClientId} not send, with payload ${JSON.stringify(messageSend)}. Connection not open`);
                 } else {
@@ -93,12 +88,14 @@ wss.on('connection', (ws, req) => {
 setInterval(async () => {
     logger.infoWithContext('running checking client socket by send ping')
     const clients = await redisClient.hgetall(CLIENTS_KEY);
-    console.log(`Number of connected clients: ${JSON.stringify(clients)}`)
+    const numberOfClientConnected = Object.entries(clients)
+    logger.infoWithContext(`Number of connected clients: ${numberOfClientConnected.length}`)
+
     for (const [clientId, clientData] of Object.entries(clients)) {
         const clientInfo = JSON.parse(clientData);
         if (clientInfo) {
-            if (clientInfo.readyState === WebSocket.OPEN) {
-                clientInfo.ping();
+            if (clientInfo.connectDetails['_readyState'] === WebSocket.OPEN) {
+                clientData.ping();
                 logger.infoWithContext(`ping to client ${clientId} reachable`);
             } else {
                 logger.infoWithContext(`ping to client ${clientId} not reachable`);
