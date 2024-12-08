@@ -8,6 +8,7 @@ const WebSocket = require('ws');
 const clients = require('./config/clients');
 const redisClient = require('./config/redis');
 
+const CLIENTS_AVAILABLE = 'available_socket';
 const CLIENTS_KEY = 'websocket_clients';
 const CLIENTS_HISTORY = 'websocket_clients_history';
 const PORT = process.env.PORT
@@ -16,7 +17,7 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 wss.on('connection', (ws, req) => {
-    let clientId;
+    let clientId, service, podsName, pods, socketName;
 
     // Handle registration and plush message
     ws.on('message', async (message) => {
@@ -26,7 +27,19 @@ wss.on('connection', (ws, req) => {
         if (data.type === 'register') {
             clientId = data.clientId;
             clients.set(clientId, ws);
-            await redisClient.hset(CLIENTS_KEY, clientId, JSON.stringify({ clientId, connectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS') }));
+            service = data?.additonal?.service;
+            podsName = data?.additonal?.podsName;
+            pods = data?.additonal?.pods;
+            socketName = data?.additonal?.socketName;
+            const payload = {
+                service: service,
+                podsName: podsName,
+                pods: pods,
+                socketName: socketName
+            }
+
+            await redisClient.hset(CLIENTS_KEY, clientId, JSON.stringify({ clientId, connectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS'), connectDetail: ws }));
+            await redisClient.hset(CLIENTS_AVAILABLE, `${service}-${pods}`, JSON.stringify(payload));
             await redisClient.lpush(CLIENTS_HISTORY, JSON.stringify({ clientId, connectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS') }));
             // await socket.createClient(clientId);
             logger.infoWithContext(`Registered client: ${clientId}`);
@@ -58,6 +71,13 @@ wss.on('connection', (ws, req) => {
         if (clientId) {
             // clients.delete(clientId);
             await redisClient.hdel(CLIENTS_KEY, clientId);
+            const payload = {
+                service: service,
+                podsName: '',
+                pods: pods,
+                socketName: socketName
+            }
+            await redisClient.hset(CLIENTS_AVAILABLE, `${service}-${pods}`, JSON.stringify(payload));
             await redisClient.lpush(CLIENTS_HISTORY, JSON.stringify({ clientId, disConnectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS') }));
             // await socket.deleteClient(clientId)
             logger.infoWithContext(`Disconnected client: ${clientId}, ${ws.readyState}`);
