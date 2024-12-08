@@ -21,6 +21,7 @@ wss.on('connection', (ws, req) => {
     // Handle registration and plush message
     ws.on('message', async (message) => {
         const data = JSON.parse(message);
+        logger.infoWithContext(`payload received on pass message ${JSON.stringify(data)}`)
 
         if (data.type === 'register') {
             clientId = data.clientId;
