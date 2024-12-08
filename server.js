@@ -25,9 +25,8 @@ wss.on('connection', (ws, req) => {
         if (data.type === 'register') {
             clientId = data.clientId;
             clients.set(clientId, ws);
-            console.log('wswsws nyaaa', ws)
             await redisClient.hset(CLIENTS_KEY, clientId, JSON.stringify({ clientId, connectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS') }));
-            await redisClient.hset(CLIENTS_HISTORY, clientId, JSON.stringify({ clientId, connectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS') }));
+            await redisClient.lpush(CLIENTS_HISTORY, JSON.stringify({ clientId, connectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS') }));
             // await socket.createClient(clientId);
             logger.infoWithContext(`Registered client: ${clientId}`);
         } else if (data.type === 'message') {
@@ -58,7 +57,7 @@ wss.on('connection', (ws, req) => {
         if (clientId) {
             // clients.delete(clientId);
             await redisClient.hdel(CLIENTS_KEY, clientId);
-            await redisClient.hset(CLIENTS_HISTORY, clientId, JSON.stringify({ clientId, disConnectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS') }));
+            await redisClient.lpush(CLIENTS_HISTORY, JSON.stringify({ clientId, disConnectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS') }));
             // await socket.deleteClient(clientId)
             logger.infoWithContext(`Disconnected client: ${clientId}, ${ws.readyState}`);
         }
