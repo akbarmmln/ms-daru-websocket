@@ -3,7 +3,7 @@ require('dotenv').config();
 const http = require('http');
 const app = require('./app');
 const logger = require('./config/logger');
-const socket = require('./api/v1/socket/controller');
+const moment = require('moment');
 const WebSocket = require('ws');
 const clients = require('./config/clients');
 const redisClient = require('./config/redis');
