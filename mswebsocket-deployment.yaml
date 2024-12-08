@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mswebsocket
+  namespace: sit
+  labels:
+    app: mswebsocket
+    version: v1
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  minReadySeconds: 60
+  selector:
+    matchLabels:
+      app: mswebsocket
+  template:
+    metadata:
+      labels:
+        app: mswebsocket
+        version: v1
+    spec:
+      containers:
+      - name: mswebsocket
+        image: taufik90/ms-websocket:14
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8990
+        livenessProbe:
+          httpGet:
+            path: /api/v1/healthcheck/healty
+            port: 8990
+          failureThreshold: 10
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /api/v1/healthcheck/healty
+            port: 8990
+          failureThreshold: 10
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 30
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 60"]
+        env:
+         - name: PORT
+           valueFrom:
+            secretKeyRef:
+              name: mswebsocket-secret
+              key: PORT
+         - name: MYSQL_HOSTNAME
+           valueFrom:
+            secretKeyRef:
+              name: mswebsocket-secret
+              key: MYSQL_HOSTNAME
+         - name: MYSQL_USERNAME
+           valueFrom:
+            secretKeyRef:
+              name: mswebsocket-secret
+              key: MYSQL_USERNAME
+         - name: MYSQL_PASSWORD
+           valueFrom:
+            secretKeyRef:
+              name: mswebsocket-secret
+              key: MYSQL_PASSWORD
+         - name: MYSQL_PORT
+           valueFrom:
+            secretKeyRef:
+              name: mswebsocket-secret
+              key: MYSQL_PORT
+         - name: MYSQL_DATABASE
+           valueFrom:
+            secretKeyRef:
+              name: mswebsocket-secret
+              key: MYSQL_DATABASE
+         - name: SSL_SEQUELIZE
+           valueFrom:
+            secretKeyRef:
+              name: mswebsocket-secret
+              key: SSL_SEQUELIZE
+         - name: LOGGER_LEVEL
+           valueFrom:
+            secretKeyRef:
+              name: mswebsocket-secret
+              key: LOGGER_LEVEL
+         - name: SERVICE_NAME
+           valueFrom:
+            secretKeyRef:
+              name: mswebsocket-secret
+              key: SERVICE_NAME
+         - name: REDIS_HOST
+           valueFrom:
+            secretKeyRef:
+              name: mswebsocket-secret
+              key: REDIS_HOST
+         - name: REDIS_PORT
+           valueFrom:
+            secretKeyRef:
+              name: mswebsocket-secret
+              key: REDIS_PORT
+         - name: REDIS_PASSWORD
+           valueFrom:
+            secretKeyRef:
+              name: mswebsocket-secret
+              key: REDIS_PASSWORD
