@@ -7,6 +7,7 @@ const moment = require('moment');
 const WebSocket = require('ws');
 const clients = require('./config/clients');
 const redisClient = require('./config/redis');
+const Constant = require('./utils/constant');
 
 const CLIENTS_AVAILABLE = 'available_socket';
 const CLIENTS_KEY = 'websocket_clients';
@@ -29,9 +30,6 @@ wss.on('connection', (ws, req) => {
             agent = data.agent;
             clients.set(clientId, ws);
 
-            await redisClient.hset(CLIENTS_KEY, clientId, JSON.stringify({ clientId, connectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS'), connectDetail: ws }));
-            await redisClient.lpush(CLIENTS_HISTORY, JSON.stringify({ clientId, connectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS') }));
-
             if (agent === 'microservice') {
                 service = data?.additonal?.service;
                 podsName = data?.additonal?.podsName;
@@ -43,8 +41,14 @@ wss.on('connection', (ws, req) => {
                     pods: pods,
                     socketName: socketName
                 }
+                await redisClient.set(Constant.formatNameRedis(Constant.Constant.REDIS.WEBSOCKET_CLIENT, 'microservice', `${service}-${pods}`), JSON.stringify({ clientId, connectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS') }));
                 await redisClient.hset(CLIENTS_AVAILABLE, `${service}-${pods}`, JSON.stringify(payload));
+            } else {
+                await redisClient.set(Constant.formatNameRedis(Constant.Constant.REDIS.WEBSOCKET_CLIENT, `apps`, clientId), JSON.stringify({ clientId, connectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS') }));
             }
+            await redisClient.lpush(CLIENTS_HISTORY, JSON.stringify({ clientId, connectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS') }));
+
+            // await redisClient.hset(CLIENTS_KEY, clientId, JSON.stringify({ clientId, connectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS') }));
             // await socket.createClient(clientId);
             logger.infoWithContext(`Registered client: ${clientId}`);
         } else if (data.type === 'message') {
@@ -74,9 +78,6 @@ wss.on('connection', (ws, req) => {
     ws.on('close', async () => {
         if (clientId) {
             // clients.delete(clientId);
-            await redisClient.hdel(CLIENTS_KEY, clientId);
-            await redisClient.lpush(CLIENTS_HISTORY, JSON.stringify({ clientId, disConnectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS') }));
-
             if (agent === 'microservice') {
                 const payload = {
                     service: service,
@@ -84,8 +85,14 @@ wss.on('connection', (ws, req) => {
                     pods: pods,
                     socketName: socketName
                 }
+                await redisClient.del(Constant.formatNameRedis(Constant.Constant.REDIS.WEBSOCKET_CLIENT, 'microservice', `${service}-${pods}`));
                 await redisClient.hset(CLIENTS_AVAILABLE, `${service}-${pods}`, JSON.stringify(payload));
+            } else {
+                await redisClient.del(Constant.formatNameRedis(Constant.Constant.REDIS.WEBSOCKET_CLIENT, `apps`, clientId));
             }
+            await redisClient.lpush(CLIENTS_HISTORY, JSON.stringify({ clientId, disConnectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS') }));
+            
+            // await redisClient.hdel(CLIENTS_KEY, clientId);
             // await socket.deleteClient(clientId)
             logger.infoWithContext(`Disconnected client: ${clientId}, ${ws.readyState}`);
         }
