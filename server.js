@@ -75,7 +75,7 @@ wss.on('connection', (ws, req) => {
         if (clientId) {
             // clients.delete(clientId);
             await redisClient.hdel(CLIENTS_KEY, clientId);
-            await redisClient.hset(CLIENTS_AVAILABLE, `${service}-${pods}`, JSON.stringify(payload));
+            await redisClient.lpush(CLIENTS_HISTORY, JSON.stringify({ clientId, disConnectedAt: moment().format('YYYY-MM-DD HH:mm:ss.SSS'), connectDetail: ws }));
 
             if (agent === 'microservice') {
                 const payload = {
