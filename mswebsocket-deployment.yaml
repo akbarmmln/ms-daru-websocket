@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
       - name: mswebsocket
-        image: taufik90/ms-websocket:14
+        image: taufik90/ms-websocket:$BUILD_NUMBER
         imagePullPolicy: Always
         ports:
         - containerPort: 8990
